@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { CricketLoader } from './CricketLoader';
 import type { GlobeCanvasProps } from './globe/GlobeCanvas';
 import { cn } from '@/lib/utils';
@@ -17,19 +17,28 @@ export interface GlobeProps extends GlobeCanvasProps {
 }
 
 /** 3D globe with a cricket-ball loader shown until WebGL is ready. */
-export function Globe({ className, loadingLabel = 'Rolling out the globe…', onReady, ...props }: GlobeProps) {
+export const Globe = memo(function Globe({
+  className,
+  loadingLabel = 'Rolling out the globe…',
+  onReady,
+  ...props
+}: GlobeProps) {
   const [ready, setReady] = useState(false);
+
+  // Stable identity, so re-renders of the parent never reach the (memoised) canvas.
+  const onReadyRef = useRef(onReady);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  });
+  const handleReady = useCallback(() => {
+    setReady(true);
+    onReadyRef.current?.();
+  }, []);
 
   return (
     <div className={cn('relative h-full w-full', className)}>
       <div className={cn('absolute inset-0 transition-opacity duration-700', ready ? 'opacity-100' : 'opacity-0')}>
-        <GlobeCanvas
-          {...props}
-          onReady={() => {
-            setReady(true);
-            onReady?.();
-          }}
-        />
+        <GlobeCanvas {...props} onReady={handleReady} />
       </div>
       {!ready && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -38,4 +47,4 @@ export function Globe({ className, loadingLabel = 'Rolling out the globe…', on
       )}
     </div>
   );
-}
+});

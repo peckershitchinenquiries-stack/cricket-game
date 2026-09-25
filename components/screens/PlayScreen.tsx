@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import type { AnswerResult } from '@/types';
 import type { GlobePov } from '@/components/Globe';
 import { Globe } from '@/components/Globe';
 import { CricketLoader } from '@/components/CricketLoader';
@@ -22,6 +23,43 @@ function overviewAltitude(): number {
   return fitGlobeAltitude(window.innerWidth, window.innerHeight, 1.06);
 }
 
+/** Its own component so the per-frame count-up re-renders just this number, not the whole screen. */
+function RunningScore({ total }: { total: number }) {
+  const shown = useCountUp(total, { duration: 900, delay: 600 });
+  return <>{formatNumber(shown)}</>;
+}
+
+// Zero points, so the hidden copy below neither counts up nor throws confetti.
+const WARMUP_ANSWER: AnswerResult = {
+  question_id: 'warmup',
+  question_text: '',
+  position: 1,
+  guess_lat: 0,
+  guess_lng: 0,
+  correct_lat: 0,
+  correct_lng: 0,
+  correct_label: 'London, England',
+  distance_km: 5204,
+  points: 0,
+  max_points: 100,
+  color: 'red',
+  total_so_far: 0,
+};
+
+/**
+ * The first time the browser lays out the reveal's text styles (new sizes and weights, the 📍 emoji) is
+ * a one-off ~30 ms stall, on a phone several times that — right as the camera starts flying. Laying the
+ * reveal out once, invisibly, while the player is still aiming moves that cost off the animation.
+ */
+const RevealWarmup = memo(function RevealWarmup() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none invisible absolute inset-x-0 top-0 flex items-start gap-4 px-5">
+      <DistanceReveal answer={WARMUP_ANSWER} />
+      <ScoreReveal answer={WARMUP_ANSWER} />
+    </div>
+  );
+});
+
 export function PlayScreen() {
   const game = useGameState();
   const { phase, question, guess, currentAnswer, answers, index, total } = game;
@@ -30,8 +68,6 @@ export function PlayScreen() {
   // Pause the confirm-pin auto-timer while a finger is on the globe (rotating / zooming to refine).
   const [holding, setHolding] = useState(false);
   const [interactions, setInteractions] = useState(0);
-
-  const runningTotal = useCountUp(total, { duration: 900, delay: 600 });
 
   useEffect(() => {
     if (!holding) return;
@@ -108,6 +144,8 @@ export function PlayScreen() {
 
   return (
     <main className="app-shell-fixed-wide bg-stars">
+      <RevealWarmup />
+
       {/* Globe fills the screen; shifted up to sit above the sheet. */}
       <div className="absolute inset-0">
         <Globe
@@ -139,7 +177,7 @@ export function PlayScreen() {
           <div className="min-w-[4.5rem] rounded-xl bg-white/5 px-3 py-1.5 text-right">
             <p className="text-[11px] font-medium uppercase tracking-wider text-mist">Score</p>
             <p className="font-display text-lg font-bold leading-none tabular-nums text-gold">
-              {formatNumber(runningTotal)}
+              <RunningScore total={total} />
             </p>
           </div>
         </div>

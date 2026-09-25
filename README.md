@@ -37,6 +37,7 @@ Import the repo, add the environment variables above, and deploy. No other confi
 | Scoring (Haversine, distance bands, colors) | `lib/scoring.ts` |
 | Game state machine (aim → pin → confirm → reveal → next) | `hooks/useGameState.ts` |
 | Globe (tap detection, pins, rings, arcs, camera) | `components/globe/GlobeCanvas.tsx` |
+| Globe borders, country names and tap picking (single-draw-call meshes) | `components/globe/scene-layers.ts` |
 | Server game logic (rounds, scoring, final score) | `lib/server/game.ts` |
 | Data layer (Supabase + in-memory) | `lib/server/repo.ts`, `supabase-repo.ts`, `memory-repo.ts` |
 | Share card (Canvas → PNG → Web Share / clipboard) | `lib/share.ts`, `components/ShareCard.tsx` |

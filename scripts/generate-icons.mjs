@@ -31,7 +31,7 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   </defs>
   <rect width="1200" height="630" fill="url(#g)"/>
   <image href="data:image/svg+xml;base64,${icon.toString('base64')}" x="120" y="175" width="280" height="280"/>
-  <text x="450" y="290" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="96" font-weight="800" fill="#ffffff">CrickTap</text>
+  <text x="450" y="290" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="96" font-weight="800" fill="#ffffff">CrickeTap</text>
   <text x="454" y="360" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="36" fill="#b0bec5">The daily cricket geography quiz</text>
   <g transform="translate(456 410)">
     <circle cx="18" cy="18" r="18" fill="#4caf50"/><circle cx="68" cy="18" r="18" fill="#ffeb3b"/>

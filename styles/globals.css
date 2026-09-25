@@ -48,6 +48,12 @@
     height: 100vh;
     height: 100dvh;
   }
+  /* Play screen only: no phone-column cap — the globe fills the full viewport width so it can be zoomed without clipping. */
+  .app-shell-fixed-wide {
+    @apply relative w-full overflow-hidden;
+    height: 100vh;
+    height: 100dvh;
+  }
   .pt-safe { padding-top: max(var(--safe-top), 12px); }
   .pb-safe { padding-bottom: max(var(--safe-bottom), 16px); }
 

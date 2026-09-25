@@ -1,4 +1,4 @@
-# CrickTap — Daily Cricket Quiz
+# CrickeTap — Daily Cricket Quiz
 
 A daily geography game: 5 cricket questions, one 3D globe. Tap where you think the answer is. The closer your pin, the more you score (100 · 100 · 200 · 300 · 300 = 1,000).
 

@@ -8,6 +8,7 @@ import { DailyAverage } from '@/components/DailyAverage';
 import { Globe } from '@/components/Globe';
 import { Logo } from '@/components/Logo';
 import { ResultsDots } from '@/components/ResultsDots';
+import { ScoringCurve } from '@/components/ScoringCurve';
 import { ShareCard } from '@/components/ShareCard';
 import { StreakCounter } from '@/components/StreakCounter';
 import { APP_TAGLINE, MAX_SCORE, QUESTION_WEIGHTS } from '@/lib/config';
@@ -57,6 +58,12 @@ function HowToPlay() {
             </li>
           ))}
         </ul>
+        <div>
+          <p>Points fade smoothly the further your pin lands — no cliffs, and no zeros for a rough guess:</p>
+          <div className="card mt-2 p-3">
+            <ScoringCurve />
+          </div>
+        </div>
         <p>A new round drops every day at midnight UTC. Keep your streak alive!</p>
       </div>
     </details>

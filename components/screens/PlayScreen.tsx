@@ -12,14 +12,14 @@ import { ScoreReveal } from '@/components/ScoreReveal';
 import { TimedButton } from '@/components/TimedButton';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useGameState } from '@/hooks/useGameState';
-import { AUTO_ADVANCE_MS, AUTO_CONFIRM_MS } from '@/lib/config';
+import { AUTO_CONFIRM_MS } from '@/lib/config';
 import { midpoint } from '@/lib/scoring';
 import { clamp, fitGlobeAltitude, formatNumber } from '@/lib/utils';
 
 /** Far enough out to see the whole globe in the viewport (portrait phones need more). */
 function overviewAltitude(): number {
   if (typeof window === 'undefined') return 2.5;
-  return fitGlobeAltitude(Math.min(window.innerWidth, 500), window.innerHeight, 1.06);
+  return fitGlobeAltitude(window.innerWidth, window.innerHeight, 1.06);
 }
 
 export function PlayScreen() {
@@ -27,10 +27,9 @@ export function PlayScreen() {
   const { phase, question, guess, currentAnswer, answers, index, total } = game;
 
   const [pov, setPov] = useState<GlobePov | null>(null);
-  // Pause auto-timers while a finger is on the globe (rotating / zooming to refine).
+  // Pause the confirm-pin auto-timer while a finger is on the globe (rotating / zooming to refine).
   const [holding, setHolding] = useState(false);
   const [interactions, setInteractions] = useState(0);
-  const [advancePaused, setAdvancePaused] = useState(false);
 
   const runningTotal = useCountUp(total, { duration: 900, delay: 600 });
 
@@ -51,7 +50,6 @@ export function PlayScreen() {
   // New question → pull the camera back out so the whole hemisphere is in play.
   useEffect(() => {
     if (phase !== 'aiming') return;
-    setAdvancePaused(false);
     const altitude = overviewAltitude();
     setPov(index === 0 ? { lat: 18, lng: 60, altitude, ms: 0 } : { altitude, ms: 1000 });
   }, [index, phase]);
@@ -68,10 +66,7 @@ export function PlayScreen() {
     setPov({ ...mid, altitude, ms: 1400 });
   }, [phase, currentAnswer]);
 
-  const onInteract = useCallback(() => {
-    setHolding(true);
-    if (phase === 'revealed') setAdvancePaused(true);
-  }, [phase]);
+  const onInteract = useCallback(() => setHolding(true), []);
 
   const correctPin = useMemo(
     () =>
@@ -112,7 +107,7 @@ export function PlayScreen() {
   }
 
   return (
-    <main className="app-shell-fixed bg-stars">
+    <main className="app-shell-fixed-wide bg-stars">
       {/* Globe fills the screen; shifted up to sit above the sheet. */}
       <div className="absolute inset-0">
         <Globe
@@ -128,7 +123,7 @@ export function PlayScreen() {
 
       {/* Top bar */}
       <header className="pt-safe pointer-events-none absolute inset-x-0 top-0 z-20 px-4">
-        <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-white/10 bg-navy-950/80 p-2 pl-3">
+        <div className="pointer-events-auto mx-auto flex max-w-[600px] items-center gap-3 rounded-2xl border border-white/10 bg-navy-950/80 p-2 pl-3">
           <Link
             href="/"
             aria-label="Quit to home"
@@ -151,7 +146,7 @@ export function PlayScreen() {
       </header>
 
       {/* Bottom sheet */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto max-w-[600px]">
         <QuestionCard question={phase === 'loading' ? null : question} compact={phase === 'revealed'}>
           {phase === 'aiming' && (
             <div className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 text-[15px] text-mist">
@@ -190,16 +185,14 @@ export function PlayScreen() {
                 <DistanceReveal answer={currentAnswer} />
                 <ScoreReveal answer={currentAnswer} />
               </div>
-              <TimedButton
+              <button
+                type="button"
                 onClick={game.next}
-                durationMs={AUTO_ADVANCE_MS}
-                running={!advancePaused && !holding}
-                resetKey={currentAnswer.question_id}
                 className={game.isLast ? 'btn-gold mt-4 w-full' : 'btn-primary mt-4 w-full'}
               >
                 {game.isLast ? 'See my results' : 'Next question'}
                 <span aria-hidden="true">→</span>
-              </TimedButton>
+              </button>
             </div>
           )}
         </QuestionCard>

@@ -12,7 +12,7 @@ export function StumpsIcon({ className }: { className?: string }) {
   );
 }
 
-/** Wordmark. The split "Crick" + "Tap" styling lives here — change it with APP_NAME. */
+/** Wordmark. The split "Cricke" + "Tap" styling lives here — change it with APP_NAME. */
 export function Logo({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg'; className?: string }) {
   const text = { sm: 'text-xl', md: 'text-2xl', lg: 'text-5xl' }[size];
   const icon = { sm: 'h-6 w-6', md: 'h-8 w-8', lg: 'h-14 w-14' }[size];
@@ -20,7 +20,7 @@ export function Logo({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg'; cl
     <div className={cn('flex items-center gap-2', className)}>
       <StumpsIcon className={icon} />
       <span className={cn('font-display font-extrabold tracking-tight', text)}>
-        Crick<span className="text-pitch">Tap</span>
+        Cricke<span className="text-pitch">Tap</span>
       </span>
     </div>
   );

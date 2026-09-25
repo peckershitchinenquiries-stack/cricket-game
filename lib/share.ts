@@ -85,8 +85,8 @@ export async function renderShareImage(result: GameResult): Promise<Blob> {
   ctx.textAlign = 'left';
   ctx.font = `800 20px ${display}`;
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('Crick', 62, 38);
-  const crickWidth = ctx.measureText('Crick').width;
+  ctx.fillText('Cricke', 62, 38);
+  const crickWidth = ctx.measureText('Cricke').width;
   ctx.fillStyle = '#00c853';
   ctx.fillText('Tap', 62 + crickWidth, 38);
 
@@ -172,7 +172,7 @@ export async function shareResult(result: GameResult, image?: Blob | null): Prom
   if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
     try {
       if (image) {
-        const file = new File([image], `cricktap-${result.round_number}.png`, { type: 'image/png' });
+        const file = new File([image], `cricketap-${result.round_number}.png`, { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
           await navigator.share({ files: [file], text, title });
           return 'shared';
@@ -186,19 +186,4 @@ export async function shareResult(result: GameResult, image?: Blob | null): Prom
     }
   }
   return (await copyText(text)) ? 'copied' : 'failed';
-}
-
-export async function copyShareText(result: GameResult): Promise<boolean> {
-  return copyText(buildShareText(result));
-}
-
-export function downloadImage(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

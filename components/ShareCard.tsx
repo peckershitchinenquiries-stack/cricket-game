@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import type { GameResult } from '@/types';
-import { copyShareText, downloadImage, renderShareImage, shareResult } from '@/lib/share';
+import { renderShareImage, shareResult } from '@/lib/share';
 import { cn, haptic } from '@/lib/utils';
 
-/** Share-card preview with the primary Share CTA plus copy/download fallbacks. */
+/** Share-card preview with the primary Share CTA (falls back to a clipboard copy where the OS share sheet isn't available). */
 export function ShareCard({ result, showPreview = true }: { result: GameResult; showPreview?: boolean }) {
   const [image, setImage] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -44,11 +44,6 @@ export function ShareCard({ result, showPreview = true }: { result: GameResult; 
     else if (outcome === 'failed') setToast('Couldn’t share — try copying instead');
   };
 
-  const onCopy = async () => {
-    haptic(10);
-    setToast((await copyShareText(result)) ? 'Copied to clipboard' : 'Copy failed');
-  };
-
   return (
     <div className="relative">
       {showPreview && (
@@ -74,20 +69,6 @@ export function ShareCard({ result, showPreview = true }: { result: GameResult; 
         </svg>
         Share result
       </button>
-
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <button type="button" onClick={onCopy} className="btn-ghost text-[15px]">
-          Copy text
-        </button>
-        <button
-          type="button"
-          onClick={() => image && downloadImage(image, `cricktap-${result.round_number}.png`)}
-          disabled={!image}
-          className="btn-ghost text-[15px]"
-        >
-          Save image
-        </button>
-      </div>
 
       <div
         role="status"

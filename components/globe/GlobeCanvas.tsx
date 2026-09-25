@@ -6,6 +6,7 @@ import { MeshPhongMaterial } from 'three';
 import { feature } from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { Feature, Geometry } from 'geojson';
+import { geoCentroid } from 'd3-geo';
 import countriesTopo from 'world-atlas/countries-110m.json';
 import type { LatLng } from '@/types';
 
@@ -43,15 +44,23 @@ interface Ring extends LatLng {
   color: string;
 }
 
+interface CountryLabel extends LatLng {
+  text: string;
+}
+
 const COLORS = {
   ocean: '#0b2340',
   oceanEmissive: '#051326',
-  land: 'rgba(22, 74, 52, 0.92)',
-  border: 'rgba(94, 252, 130, 0.35)',
+  border: 'rgba(148, 255, 178, 0.55)',
+  label: 'rgba(255, 255, 255, 0.68)',
   atmosphere: '#00c853',
   user: '#ffd700',
   correct: '#00c853',
 };
+
+// Bundled locally (from the three-globe package) so the globe stays fully offline-capable.
+const GLOBE_IMAGE_URL = '/globe/earth-day.jpg';
+const BUMP_IMAGE_URL = '/globe/earth-topology.png';
 
 // Parse country shapes once per session (Antarctica dropped — it distorts badly at the pole).
 let countryFeatures: Feature<Geometry>[] | null = null;
@@ -62,6 +71,21 @@ function getCountries(): Feature<Geometry>[] {
     countryFeatures = fc.features.filter((f) => f.id !== '010');
   }
   return countryFeatures;
+}
+
+// Country name labels, placed at each shape's centroid.
+let countryLabels: CountryLabel[] | null = null;
+function getCountryLabels(): CountryLabel[] {
+  if (!countryLabels) {
+    countryLabels = getCountries().flatMap((f) => {
+      const name = f.properties?.name as string | undefined;
+      if (!name) return [];
+      const [lng, lat] = geoCentroid(f);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+      return [{ lat, lng, text: name }];
+    });
+  }
+  return countryLabels;
 }
 
 function pinSvg(color: string): string {
@@ -111,8 +135,16 @@ export default function GlobeCanvas({
   const [ready, setReady] = useState(false);
 
   const countries = useMemo(getCountries, []);
+  // Labels clutter the small decorative home-screen globe — only show them where they help gameplay.
+  const labels = useMemo(() => (mode === 'ambient' ? [] : getCountryLabels()), [mode]);
   const material = useMemo(
-    () => new MeshPhongMaterial({ color: COLORS.ocean, emissive: COLORS.oceanEmissive, shininess: 8 }),
+    () =>
+      new MeshPhongMaterial({
+        color: COLORS.ocean,
+        emissive: COLORS.oceanEmissive,
+        shininess: 8,
+        bumpScale: 10,
+      }),
     [],
   );
 
@@ -254,19 +286,32 @@ export default function GlobeCanvas({
           backgroundColor="rgba(0,0,0,0)"
           rendererConfig={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
           globeMaterial={material}
+          globeImageUrl={GLOBE_IMAGE_URL}
+          bumpImageUrl={BUMP_IMAGE_URL}
           showAtmosphere
           atmosphereColor={COLORS.atmosphere}
           atmosphereAltitude={0.17}
           onGlobeReady={handleReady}
           // Hover raycasting off: taps are handled above, and it saves work every frame.
           enablePointerInteraction={false}
-          // Countries
+          // Countries — cap left transparent so the terrain texture shows through; just borders on top.
           polygonsData={countries}
-          polygonCapColor={() => COLORS.land}
+          polygonCapColor={() => 'rgba(0, 0, 0, 0)'}
           polygonSideColor={() => 'rgba(0,0,0,0)'}
           polygonStrokeColor={() => COLORS.border}
           polygonAltitude={0.006}
           polygonsTransitionDuration={0}
+          // Country name labels
+          labelsData={labels}
+          labelLat="lat"
+          labelLng="lng"
+          labelText="text"
+          labelSize={0.9}
+          labelColor={() => COLORS.label}
+          labelIncludeDot={false}
+          labelResolution={2}
+          labelAltitude={0.005}
+          labelsTransitionDuration={0}
           // Pins
           htmlElementsData={markers}
           htmlLat="lat"

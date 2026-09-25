@@ -37,7 +37,7 @@ export default function OpengraphImage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', fontSize: 112, fontWeight: 800, letterSpacing: -3 }}>
-            Crick<span style={{ color: '#00c853' }}>Tap</span>
+            Cricke<span style={{ color: '#00c853' }}>Tap</span>
           </div>
           <div style={{ fontSize: 36, color: '#b0bec5', marginTop: 8, maxWidth: 640 }}>{APP_TAGLINE}</div>
           <div style={{ display: 'flex', gap: 18, marginTop: 40 }}>

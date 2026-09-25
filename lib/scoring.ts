@@ -28,27 +28,20 @@ export function midpoint(a: LatLng, b: LatLng): LatLng {
   return { lat: toDeg(φ3), lng: ((toDeg(λ3) + 540) % 360) - 180 };
 }
 
-const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
-
-/** Distance where the score finally reaches zero. */
-export const ZERO_SCORE_KM = 5000;
+/** Curve shape constants — tuned to track GeoSports' decay (100 · 71 · 58 · 50 · 45 · 41 at 0/1k/2k/3k/4k/5k km). */
+const CURVE_STEEPNESS = 0.2172;
+const CURVE_SCALE_KM = 345;
 
 /**
  * Fraction of a question's max points earned for a given distance.
- *  0–50 km      → 100%
- *  50–200 km    → 99% → 80%
- *  200–500 km   → 80% → 50%
- *  500–1500 km  → 50% → 20%
- *  1500–5000 km → 20% → 0%
+ * A smooth logarithmic decay (no cliff, no flat "free" zone): a spot-on tap
+ * scores full marks, and points fade gradually the further the pin lands —
+ * even a wild miss on the other side of the planet still banks a little.
  */
 export function scoreFraction(distanceKm: number): number {
   const d = Math.max(0, distanceKm);
-  if (d <= 50) return 1;
-  if (d <= 200) return lerp(0.99, 0.8, (d - 50) / 150);
-  if (d <= 500) return lerp(0.8, 0.5, (d - 200) / 300);
-  if (d <= 1500) return lerp(0.5, 0.2, (d - 500) / 1000);
-  if (d <= ZERO_SCORE_KM) return lerp(0.2, 0, (d - 1500) / (ZERO_SCORE_KM - 1500));
-  return 0;
+  const fraction = 1 - CURVE_STEEPNESS * Math.log(1 + d / CURVE_SCALE_KM);
+  return Math.min(1, Math.max(0, fraction));
 }
 
 export function accuracyColor(distanceKm: number): AccuracyColor {

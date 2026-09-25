@@ -1,6 +1,6 @@
 {
-  "name": "CrickTap — Daily Cricket Quiz",
-  "short_name": "CrickTap",
+  "name": "CrickeTap — Daily Cricket Quiz",
+  "short_name": "CrickeTap",
   "description": "5 questions. One globe. How well do you know cricket?",
   "id": "/",
   "start_url": "/?source=pwa",
